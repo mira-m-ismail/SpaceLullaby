@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Lullaby</title>
+    <link rel="icon" href="./media/outlaw-crop.ico" type="image/x-icon">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka';
+            font-weight: 1000;
+            overflow-x: hidden;
+            background: linear-gradient(180deg, #1a1a2e 0%, #2d1b4e 50%, #1a1a2e 100%);
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .content {
+            max-width: 800px;
+            text-align: center;
+            color: #e8e4f3;
+            font-size: 2.5rem;
+            line-height: 1.8;
+            text-shadow: 0 0 20px rgba(138, 101, 230, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Background variations */
+        .section:nth-child(1) {
+            background: radial-gradient(circle at center, #4a3a6b 0%, #2d1b4e 100%);
+        }
+
+        .section:nth-child(2) {
+            background: linear-gradient(135deg, #2d1b4e 0%, #1a1a3e 100%);
+        }
+
+        .section:nth-child(3) {
+            background: radial-gradient(ellipse at top, #5b4a7d 0%, #2d1b4e 100%);
+        }
+
+        /* PNG Image container */
+        .floating-image {
+            position: absolute;
+            max-width: 500px;
+            max-height: 500px;
+            object-fit: contain;
+            opacity: 0;
+            transform: scale(0.8) translateY(50px);
+            transition: opacity 2s ease, transform 2s ease;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .section.visible .floating-image {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .section:not(.visible) .floating-image {
+            opacity: 0;
+            transform: scale(0.8) translateY(50px);
+        }
+
+        /* Floating stars */
+        .falling-star {
+            position: fixed;
+            font-size: 1.5rem;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: fall 12s linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) translateX(-50px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Starfield background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Glow effects */
+        .glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-1 {
+            background: #8a65e6;
+            top: 10%;
+            left: 10%;
+            animation: pulse 8s infinite;
+        }
+
+        .glow-2 {
+            background: #6b8cff;
+            bottom: 10%;
+            right: 10%;
+            animation: pulse 8s infinite 4s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+        }
+
+        /* Special effects for entire page */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                        rgba(138, 101, 230, 0.2) 0%, 
+                        transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Glitch effect for monster transformation */
+        .glitch {
+            position: relative;
+        }
+
+        /* disable old pseudo-element glitch copies (we'll use a color-transition instead) */
+        /* isolate the color transition to only the target word */
+        .glitch .content { transition: transform 1.2s ease; }
+
+        .glitch .content .highlight-word {
+            transition: color 1.2s ease, text-shadow 1.2s ease, transform 1.2s ease;
+            color: inherit;
+        }
+
+        .glitch.visible .content { transform: scale(1.01); }
+
+        .glitch.visible .content .highlight-word {
+            color: #8e96f9d9; /* dreamy soft purple */
+            text-shadow: 0 0 36px #875cffd9;
+            transform: scale(1.06);
+        }
+
+        @keyframes glitch-1 {
+            0% { clip-path: inset(40% 0 61% 0); transform: translate(-2px, -2px); }
+            20% { clip-path: inset(92% 0 1% 0); transform: translate(2px, 2px); }
+            40% { clip-path: inset(43% 0 1% 0); transform: translate(-2px, 2px); }
+            60% { clip-path: inset(25% 0 58% 0); transform: translate(2px, -2px); }
+            80% { clip-path: inset(54% 0 7% 0); transform: translate(-2px, -2px); }
+            100% { clip-path: inset(58% 0 43% 0); transform: translate(2px, 2px); }
+        }
+
+        @keyframes glitch-2 {
+            0% { clip-path: inset(70% 0 20% 0); transform: translate(2px, 2px); }
+            20% { clip-path: inset(10% 0 50% 0); transform: translate(-2px, -2px); }
+            40% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+            60% { clip-path: inset(15% 0 70% 0); transform: translate(-2px, 2px); }
+            80% { clip-path: inset(60% 0 25% 0); transform: translate(2px, 2px); }
+            100% { clip-path: inset(35% 0 40% 0); transform: translate(-2px, -2px); }
+        }
+        
+        /* Background video (translucent overlay) */
+        .bg-video {
+            position: fixed;
+            inset: 0; /* top:0; right:0; bottom:0; left:0; */
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* cover the viewport */
+            opacity: 0.22; /* translucent, adjust as desired */
+            pointer-events: none; /* let clicks pass through */
+            z-index: 0; /* sits below the interactive content */
+            transform: translateZ(0); /* hint for GPU compositing */
+            filter: blur(10px);
+            
+        }
+
+        /* Respect user preference for reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .bg-video {
+                display: none;
+            }
+        }
+
+        /* Cursor star particles (glowy dust) */
+        .cursor-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 3; /* above content but non-interactive */
+            width: var(--p-size, 6px);
+            height: var(--p-size, 6px);
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, #fff 0%, rgba(255,255,255,0.95) 12%, rgba(150,190,255,0.18) 45%, rgba(160,120,220,0.12) 65%, transparent 80%);
+            filter: drop-shadow(0 0 8px rgba(160,140,255,0.45)) drop-shadow(0 0 6px rgba(200,220,255,0.18));
+            transform: translate(-50%, -50%) scale(1);
+            will-change: transform, opacity;
+            opacity: 1;
+            animation: cursor-fade 900ms cubic-bezier(.2,.8,.2,1) forwards;
+        }
+
+        @keyframes cursor-fade {
+            0% { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) translateY(-26px) scale(0.6); }
+        }
+
+        /* Mute/unmute button (larger, no background) */
+        .mute-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 6;
+            background: transparent; /* removed background per request */
+            color: #fff;
+            border: 0;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .mute-toggle svg { width: 26px; height: 26px; display: block; }
+
+        /* Volume control */
+        .volume-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(45, 27, 78, 0.7);
+            padding: 12px 18px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(138, 101, 230, 0.3);
+        }
+
+        .volume-icon {
+            color: #fff;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .volume-slider {
+            width: 100px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(138, 101, 230, 0.8);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(138, 101, 230, 0.8);
+        }
+
+        /* Replay button */
+        .replay-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 6;
+            background: rgba(45, 27, 78, 0.7);
+            color: #fff;
+            border: 1px solid rgba(138, 101, 230, 0.3);
+            padding: 12px 24px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            font-family: 'Fredoka';
+            font-size: 16px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .replay-button:hover {
+            background: rgba(138, 101, 230, 0.5);
+            transform: scale(1.05);
+        }
+
+        .replay-button.visible {
+            display: flex;
+        }
+
+        /* Skip Lullaby Button */
+        .skip-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
+            background: transparent;
+            color: rgba(232, 228, 243, 0.4);
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Fredoka';
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .skip-button:hover {
+            color: rgba(232, 228, 243, 0.7);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cursor-particle { display: none !important; }
+        }
+
+        /* Interactive Hub Page */
+        .interactive-hub {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(180deg, #1a1a2e 0%, #2d1b4e 50%, #1a1a2e 100%);
+            opacity: 0;
+            transform: translateY(100vh);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            z-index: 10;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .interactive-hub.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            overflow-y: auto;
+        }
+
+        .hub-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            width: 100%;
+        }
+
+        .hub-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #e8e4f3;
+        }
+
+        .hub-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(138, 101, 230, 0.5);
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 28px;
+            background: rgba(45, 27, 78, 0.5);
+            border: 2px solid rgba(138, 101, 230, 0.3);
+            color: #e8e4f3;
+            font-family: 'Fredoka';
+            font-size: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn:hover {
+            background: rgba(138, 101, 230, 0.3);
+            border-color: rgba(138, 101, 230, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: rgba(138, 101, 230, 0.5);
+            border-color: #8a65e6;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(138, 101, 230, 0.5);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Credits Tab */
+        .credits-section {
+            text-align: center;
+            color: #e8e4f3;
+            line-height: 1.8;
+        }
+
+        .credits-section h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 20px rgba(138, 101, 230, 0.5);
+        }
+
+        .credit-item {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(45, 27, 78, 0.3);
+            border-radius: 15px;
+            border: 1px solid rgba(138, 101, 230, 0.2);
+        }
+
+        .credit-item h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #c9b4ff;
+        }
+
+        .credit-item p {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .credit-item a {
+            color: #8a65e6;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .credit-item a:hover {
+            color: #c9b4ff;
+            text-decoration: underline;
+        }
+
+        /* Characters Tab */
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .character-card {
+            background: rgba(45, 27, 78, 0.4);
+            border: 2px solid rgba(138, 101, 230, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            color: #e8e4f3;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .character-card:hover {
+            transform: translateY(-10px);
+            background: rgba(138, 101, 230, 0.2);
+            border-color: rgba(138, 101, 230, 0.6);
+            box-shadow: 0 0 30px rgba(138, 101, 230, 0.4);
+        }
+
+        .character-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #c9b4ff;
+        }
+
+        .character-card p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Easter Eggs Tab */
+        .easter-eggs-container {
+            text-align: center;
+        }
+
+        .easter-eggs-container h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #e8e4f3;
+            text-shadow: 0 0 20px rgba(138, 101, 230, 0.5);
+        }
+
+        .egg-counter {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #c9b4ff;
+        }
+
+        .stars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .egg-star {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(45, 27, 78, 0.3);
+            border: 2px solid rgba(138, 101, 230, 0.3);
+        }
+
+        .egg-star:hover {
+            transform: scale(1.1) rotate(10deg);
+            border-color: rgba(138, 101, 230, 0.6);
+        }
+
+        .egg-star.collected {
+            background: rgba(138, 101, 230, 0.3);
+            border-color: #8a65e6;
+            box-shadow: 0 0 15px rgba(138, 101, 230, 0.6);
+        }
+
+        .celebration-message {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(138, 101, 230, 0.2);
+            border: 2px solid rgba(138, 101, 230, 0.5);
+            border-radius: 15px;
+            color: #c9b4ff;
+            font-size: 1.3rem;
+            text-shadow: 0 0 15px rgba(138, 101, 230, 0.5);
+            display: none;
+        }
+
+        .celebration-message.show {
+            display: block;
+            animation: pulse 1s ease infinite;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Starfield -->
+    <div class="stars" id="starfield"></div>
+    
+    <!-- Glow effects -->
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <!-- Background video (translucent, muted, looped, static) -->
+    <!-- Put your video file at ./media/space-bg.mp4 or update the src accordingly -->
+    <video id="bg-video" class="bg-video" autoplay muted playsinline aria-hidden="true" tabindex="-1" poster="./media/space-poster.jpg">
+        <source src="./media/PuppyCat Lullaby _ Space Lullaby Bee and PuppyCat (Soundtrack from the Netflix Series) Vol. 1 - Cartoon Hangover (1080p, h264).mp4" type="video/mp4">
+        <!-- Fallback text -->
+    </video>
+
+    <!-- Volume Control (top-right) -->
+    <div class="volume-control">
+        <svg class="volume-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M3 10v4h4l5 4V6L7 10H3z" fill="currentColor"></path>
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z" fill="currentColor"></path>
+        </svg>
+        <input id="volume-slider" class="volume-slider" type="range" min="0" max="100" value="50" aria-label="Volume control">
+    </div>
+
+    <!-- Skip Lullaby Button -->
+    <button id="skip-button" class="skip-button" title="Skip to interactive page">Skip</button>
+
+    <!-- Story sections with timestamps -->
+    <div class="section" data-start="0" data-end="6">
+        <div class="content">Once upon a time...<br>there was a space outlaw</div>
+    </div>
+
+    <div class="section" data-start="6" data-end="10">
+        <div class="content">who fell in love with the Space King's daughter</div>
+    </div>
+
+    <div class="section" data-start="10" data-end="14">
+        <div class="content">and they both knew they were meant to be together.</div>
+    </div>
+
+    <div class="section image-bg" data-start="14" data-end="23">
+        <div class="content">So the princess agreed to run away,<br>and they planned to meet at their favorite meadow</div>
+    </div>
+
+    <div class="section" data-start="23" data-end="27">
+        <div class="content">But it was a trap.<br>The princess had lied.</div>
+    </div>
+
+    <div class="section" data-start="27" data-end="31">
+        <div class="content">The outlaw was surrounded by the King's army of warlocks.</div>
+    </div>
+
+    <div class="section" data-start="31" data-end="36">
+        <div class="content">Filled with anger from her betrayal,<br>the magic that was meant to capture the outlaw</div>
+    </div>
+    
+    <div class="section glitch" data-start="36" data-end="41" data-text="Verse Eight">
+        <div class="content">instead transformed him into a <span class="highlight-word">monster</span></div>
+    </div>
+
+    <!-- Pause Section (41s - 79s) -->
+    <div class="section" data-start="41" data-end="79">
+        <div class="content">✨</div>
+    </div>
+
+    <div class="section" data-start="79" data-end="83">
+        <div class="content">And so the space outlaw continued to run,</div>
+    </div>
+
+    <div class="section" data-start="83" data-end="87">
+        <div class="content">running from planet to planet.</div>
+    </div>
+
+    <div class="section" data-start="87" data-end="89">
+        <div class="content">Running from the princess,</div>
+    </div>
+
+    <div class="section" data-start="89" data-end="91">
+        <div class="content">running from the warlocks,</div>
+    </div>
+
+    <div class="section" data-start="91" data-end="93">
+        <div class="content">running from his memories,</div>
+    </div>
+
+    <div class="section" data-start="93" data-end="96">
+        <div class="content">and his past.</div>
+    </div>
+
+    <div class="section" data-start="96" data-end="99">
+        <div class="content">But he grows weary</div>
+    </div>
+
+    <div class="section" data-start="99" data-end="104">
+        <div class="content">And his monstrous feet can't run forever.</div>
+    </div>
+
+    <!-- Pause Section (104s - 107s) -->
+    <div class="section" data-start="104" data-end="107">
+        <div class="content">✨</div>
+    </div>
+
+    <div class="section" data-start="107" data-end="112">
+        <div class="content">He comes to a land, familiar yet not,</div>
+    </div>
+
+    <div class="section" data-start="112" data-end="115">
+        <div class="content">making new friends and a new life</div>
+    </div>
+
+    <div class="section" data-start="115" data-end="118">
+        <div class="content">But though he stopped running</div>
+    </div>
+
+    <div class="section" data-start="118" data-end="125">
+        <div class="content">the space outlaw's past had never stopped chasing.</div>
+    </div>
+
+    <!-- Final Section (125s - 130s) -->
+    <div class="section" data-start="125" data-end="130">
+        <div class="content">✨ Puppycat's Space Lullaby ✨<br><p>Original characters owned by Natasha Allegri, all rights reserved.<br>Site by Mira Ismail for Designathon.</p></div>
+    </div>
+
+    <!-- Interactive Hub Page -->
+    <div class="interactive-hub" id="interactive-hub">
+        <div class="hub-container">
+            <div class="hub-header">
+                <h1>✨ Space Lullaby ✨</h1>
+                <p style="color: #c9b4ff; font-size: 1.1rem;">Explore the story of the Space Outlaw</p>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="credits">Credits</button>
+                <button class="tab-btn" data-tab="characters">Characters</button>
+            </div>
+
+            <!-- Credits Tab -->
+            <div class="tab-content active" id="credits-tab">
+                <div class="credits-section">
+                    <h2>Credits</h2>
+                    
+                    <div class="credit-item">
+                        <h3>Original Story & Characters</h3>
+                        <p>Created by <strong>Natasha Allegri</strong></p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">All original characters and intellectual property are owned by Natasha Allegri. All rights reserved.</p>
+                    </div>
+
+                    <div class="credit-item">
+                        <h3>Featured Work</h3>
+                        <p>Bee and PuppyCat</p>
+                        <p><a href="https://www.netflix.com" target="_blank">Netflix Original Series</a></p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Audio track: "Space Lullaby" from the official soundtrack</p>
+                    </div>
+
+                    <div class="credit-item">
+                        <h3>Animation Studio</h3>
+                        <p><a href="https://www.cartooonhangover.com" target="_blank">Cartoon Hangover</a></p>
+                    </div>
+
+                    <div class="credit-item">
+                        <h3>Site Design & Development</h3>
+                        <p>Mira Ismail</p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Created for Designathon</p>
+                    </div>
+
+                    <div class="credit-item">
+                        <h3>Copyright Notice</h3>
+                        <p style="font-size: 0.9rem;">This is a fan-made interactive experience created for educational and appreciation purposes. All rights to Bee and PuppyCat, its characters, and soundtrack belong to their respective creators and copyright holders.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Characters Tab -->
+            <div class="tab-content" id="characters-tab">
+                <h2 style="text-align: center; color: #e8e4f3; margin-bottom: 2rem; font-size: 2rem; text-shadow: 0 0 20px rgba(138, 101, 230, 0.5);">Characters</h2>
+                <div class="characters-grid">
+                    <div class="character-card">
+                        <h3>The Space Outlaw</h3>
+                        <p>PuppyCat in his monstrous form. A tragic figure transformed by magic, cursed to run across the cosmos. Despite his fearsome appearance, he retains a gentle heart beneath the monster's exterior.</p>
+                    </div>
+
+                    <div class="character-card">
+                        <h3>The Princess</h3>
+                        <p>The Space King's daughter. She fell in love with the outlaw, only to betray him to satisfy her father's wishes. Her deception sets the tragic transformation in motion.</p>
+                    </div>
+
+                    <div class="character-card">
+                        <h3>The Warlocks</h3>
+                        <p>The Space King's army of magical servants. Commanded to capture the outlaw, their spell backfires and transforms him instead. They become his relentless pursuers.</p>
+                    </div>
+
+                    <div class="character-card">
+                        <h3>New Friends</h3>
+                        <p>Characters met in the distant land. They accept the monster for who he truly is, offering friendship and a new beginning. They represent hope and redemption in the story.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Easter Eggs Tab -->
+            <div class="tab-content" id="easter-eggs-tab">
+            </div>
+
+            <!-- Replay Button in Hub -->
+            <div style="text-align: center; margin-top: 3rem;">
+                <button id="replay-btn" class="tab-btn" style="padding: 14px 40px; font-size: 18px;">
+                    ↻ Replay Lullaby
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create starfield
+        const starfield = document.getElementById('starfield');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starfield.appendChild(star);
+        }
+
+        // Intersection Observer for fade-in effect (disabled for time-sync version)
+        // const observer = new IntersectionObserver((entries) => {
+        //     entries.forEach(entry => {
+        //         if (entry.isIntersecting) {
+        //             entry.target.classList.add('visible');
+        //             createStars();
+        //         }
+        //     });
+        // }, { threshold: 0.3 });
+
+        // document.querySelectorAll('.section').forEach(section => {
+        //     observer.observe(section);
+        // });
+
+        // Falling stars animation
+        function createStars() {
+            const stars = ['✨', '⭐', '💫', '🌟', '✦'];
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const star = document.createElement('div');
+                    star.className = 'falling-star';
+                    star.textContent = stars[Math.floor(Math.random() * stars.length)];
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.animationDuration = (Math.random() * 8 + 8) + 's';
+                    star.style.animationDelay = Math.random() * 2 + 's';
+                    document.body.appendChild(star);
+                    
+                    setTimeout(() => star.remove(), 14000);
+                }, i * 1500);
+            }
+        }
+
+        // Mouse tracking for entire body
+        document.body.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth) * 100;
+            const y = (e.clientY / window.innerHeight) * 100;
+            document.body.style.setProperty('--mouse-x', x + '%');
+            document.body.style.setProperty('--mouse-y', y + '%');
+        });
+
+        const audio = new Audio('./PuppyCat Lullaby Space Lullaby Bee and PuppyCat (Soundtrack from the Netflix Series) Vol. 1.mp3');
+        audio.loop = false;
+        audio.volume = 0.5;
+        // expose audio globally so UI controls can access it
+        window.audio = audio;
+        
+        // Start audio on first user interaction
+        document.addEventListener('mouseover', () => {
+            audio.play();
+        }, { once: true });
+
+        // disable selection (fallback)
+        document.addEventListener('selectstart', function(e) {
+        // allow selection when target is editable or an input
+        var t = e.target;
+        if (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+        e.preventDefault();
+        });
+
+        // Background video: try to play if allowed, but respect prefers-reduced-motion
+        (function() {
+            const bgVideo = document.getElementById('bg-video');
+            if (!bgVideo) return;
+            try {
+                const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (prefersReduced) {
+                    bgVideo.pause();
+                    bgVideo.style.display = 'none';
+                } else {
+                    // muted + playsinline should allow autoplay in most browsers
+                    bgVideo.play().catch(() => {
+                        // autoplay blocked — leave it muted; user can still start if desired
+                    });
+                }
+            } catch (e) {
+                // ignore
+            }
+        })();
+
+        // Cursor star particles + mute toggle wiring
+        (function() {
+            // Synchronize sections with audio playback
+            const bgVideo = document.getElementById('bg-video');
+            const audioEl = window.audio;
+
+            function updateSectionVisibility() {
+                const currentTime = audioEl.currentTime;
+                const sections = document.querySelectorAll('.section[data-start][data-end]');
+                
+                sections.forEach(section => {
+                    const start = parseFloat(section.dataset.start);
+                    const end = parseFloat(section.dataset.end);
+                    
+                    // Check if current time falls within this section's range
+                    if (currentTime >= start && currentTime < end) {
+                        section.classList.add('visible');
+                        // Scroll to this section
+                        section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        section.classList.remove('visible');
+                    }
+                });
+            }
+
+            // Update on audio time update
+            audioEl.addEventListener('timeupdate', updateSectionVisibility);
+
+            // Sync video to audio playback
+            audioEl.addEventListener('play', () => {
+                if (bgVideo) bgVideo.play().catch(() => {});
+            });
+
+            audioEl.addEventListener('pause', () => {
+                if (bgVideo) bgVideo.pause();
+            });
+
+            // Keep video and audio in sync
+            audioEl.addEventListener('timeupdate', () => {
+                if (bgVideo && Math.abs(bgVideo.currentTime - audioEl.currentTime) > 0.5) {
+                    bgVideo.currentTime = audioEl.currentTime;
+                }
+            });
+
+            // Respect reduced-motion
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReduced) return;
+
+            const maxParticles = 60; // global cap
+            const lifespan = 900; // ms, matches CSS animation
+            let particleCount = 0;
+            let lastTime = 0;
+            const throttleMs = 100; // min time between particle spawns (sparser trail)
+
+            const palettes = [
+                'radial-gradient(circle at 40% 40%, #fff 0%, rgba(255,255,255,0.98) 12%, rgba(200,220,255,0.18) 45%, rgba(120,160,255,0.08) 70%, transparent 80%)',
+                'radial-gradient(circle at 40% 40%, #fff 0%, rgba(255,255,255,0.98) 12%, rgba(210,190,255,0.18) 45%, rgba(170,120,230,0.08) 70%, transparent 80%)',
+                'radial-gradient(circle at 40% 40%, #fff 0%, rgba(255,255,255,0.98) 12%, rgba(190,210,255,0.18) 45%, rgba(140,180,255,0.08) 70%, transparent 80%)'
+            ];
+
+            function spawnParticle(x, y) {
+                if (particleCount >= maxParticles) return;
+                particleCount++;
+
+                const p = document.createElement('div');
+                p.className = 'cursor-particle';
+
+                // size and palette
+                const size = Math.round(5 + Math.random() * 12); // 5..17
+                p.style.setProperty('--p-size', size + 'px');
+                p.style.background = palettes[Math.floor(Math.random() * palettes.length)];
+
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+
+                document.body.appendChild(p);
+
+                // cleanup after animation
+                setTimeout(() => {
+                    p.remove();
+                    particleCount--;
+                }, lifespan + 60);
+            }
+
+            // simple spacing: avoid spawning if last spawn was too close
+            let lastPos = { x: -9999, y: -9999 };
+
+            function handleMove(ev) {
+                const now = performance.now();
+                if (now - lastTime < throttleMs) return;
+                lastTime = now;
+
+                let x, y;
+                if (ev.touches && ev.touches.length) {
+                    x = ev.touches[0].clientX;
+                    y = ev.touches[0].clientY;
+                } else {
+                    x = ev.clientX;
+                    y = ev.clientY;
+                }
+
+                const dx = x - lastPos.x;
+                const dy = y - lastPos.y;
+                const distSq = dx * dx + dy * dy;
+                // require movement of ~12px to spawn again (reduce crowding)
+                if (distSq < 12 * 12) return;
+                lastPos.x = x;
+                lastPos.y = y;
+
+                // one particle per move; occasionally spawn two
+                spawnParticle(x + (Math.random() - 0.5) * 24, y + (Math.random() - 0.5) * 24);
+                if (Math.random() > 0.95) spawnParticle(x + (Math.random() - 0.5) * 28, y + (Math.random() - 0.5) * 28);
+            }
+
+            window.addEventListener('mousemove', handleMove, { passive: true });
+            window.addEventListener('touchmove', handleMove, { passive: true });
+
+            // Mute/unmute button wiring
+            const muteBtn = document.getElementById('mute-toggle');
+            if (muteBtn && audioEl) {
+                const unmuteIcon = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M11.3 3.23c0-.4.5-.62.8-.33L16.5 7h4c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2h-4l-4.4 3.74c-.3.26-.8.04-.8-.33V3.23zm8.7 8.77h-2.5c-.28 0-.5-.22-.5-.5v-1c0-.28.22-.5.5-.5H20v2z" fill="currentColor"></path><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z" fill="currentColor"></path><path d="M19 5v14h2V5h-2z" fill="currentColor" opacity="0.15"></path></svg>';
+                const muteIcon = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 3.23v17.54c0 .4-.5.62-.8.33L8.68 15H4c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2h4.68l4.52-4.08c.3-.27.8-.05.8.33zM16 11h2.5c.28 0 .5.22.5.5v1c0 .28-.22.5-.5.5H16v-2zM16 8h2c.55 0 1 .45 1 1v6c0 .55-.45 1-1 1h-2V8z" fill="currentColor"></path></svg>';
+
+                function updateButton() {
+                    if (audioEl.muted) {
+                        muteBtn.innerHTML = muteIcon;
+                        muteBtn.setAttribute('aria-pressed', 'true');
+                        muteBtn.setAttribute('aria-label', 'Unmute audio');
+                        muteBtn.title = 'Unmute audio';
+                    } else {
+                        muteBtn.innerHTML = unmuteIcon;
+                        muteBtn.setAttribute('aria-pressed', 'false');
+                        muteBtn.setAttribute('aria-label', 'Mute audio');
+                        muteBtn.title = 'Mute audio';
+                    }
+                }
+
+                // initial state: audio may not be muted, but ensure visual matches
+                updateButton();
+
+                muteBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    audioEl.muted = !audioEl.muted;
+                    updateButton();
+                });
+            }
+
+            // Volume slider control
+            const volumeSlider = document.getElementById('volume-slider');
+            if (volumeSlider && audioEl) {
+                // Set initial volume based on slider
+                audioEl.volume = volumeSlider.value / 100;
+
+                volumeSlider.addEventListener('input', (e) => {
+                    audioEl.volume = e.target.value / 100;
+                });
+
+                // Update slider if volume changes externally
+                audioEl.addEventListener('volumechange', () => {
+                    if (!audioEl.muted) {
+                        volumeSlider.value = audioEl.volume * 100;
+                    }
+                });
+            }
+
+            // Interactive Hub Page Logic
+            const hub = document.getElementById('interactive-hub');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const collectedCountEl = document.getElementById('collected-count');
+            const celebrationMsg = document.getElementById('celebration');
+
+            // Track when to show the hub (at 130 seconds or when audio ends)
+            audioEl.addEventListener('ended', () => {
+                showInteractiveHub();
+            });
+
+            // Also check for audio reaching 130 seconds
+            audioEl.addEventListener('timeupdate', () => {
+                if (audioEl.currentTime >= 130 && !hub.classList.contains('active')) {
+                    showInteractiveHub();
+                }
+            });
+
+            function showInteractiveHub() {
+                hub.classList.add('active');
+                // Disable scrolling to story sections
+                document.querySelectorAll('.section').forEach(s => {
+                    s.classList.remove('visible');
+                });
+            }
+
+            // Tab Switching
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.dataset.tab;
+                    
+                    // Update active button
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Update active content
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(tabName + '-tab').classList.add('active');
+                });
+            });
+
+            // Replay Button
+            const replayBtn = document.getElementById('replay-btn');
+            if (replayBtn && audioEl) {
+                replayBtn.addEventListener('click', () => {
+                    // Reset audio to beginning
+                    audioEl.currentTime = 0;
+                    audioEl.play();
+                    
+                    // Hide the hub and show story sections again
+                    hub.classList.remove('active');
+                });
+            }
+
+            // Skip Button
+            const skipBtn = document.getElementById('skip-button');
+            if (skipBtn && audioEl) {
+                skipBtn.addEventListener('click', () => {
+                    // Skip to end of audio and show hub
+                    audioEl.currentTime = 130;
+                    showInteractiveHub();
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
