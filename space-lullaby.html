@@ -368,6 +368,12 @@
             margin-bottom: 1rem;
             filter: drop-shadow(0 0 15px rgba(174, 251, 255, 0.5));
             font-weight: 400;
+            
+            /* Fix for cutoff text: */
+            line-height: 1.4;      /* Gives space for tall ascenders/descenders */
+            padding-bottom: 0.2em; /* Extra room for the bottom glow/shadow */
+            padding-right: 0.1em;  /* Extra room for the right-side slant */
+            display: inline-block; /* Ensures padding works correctly with the gradient */
         }
 
         .hub-subtitle {
@@ -1272,3 +1278,4 @@
     </script>
 </body>
 </html>
+
