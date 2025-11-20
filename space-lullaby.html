@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Lullaby & The Outlaw's Archive</title>
     <link rel="icon" href="./outlaw-crop.ico" type="image/x-icon">
-    <!-- Three.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Lucide Icons for nice UI elements -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
@@ -512,24 +510,37 @@
             transition: transform 0.3s ease;
         }
 
+        /* --- UPDATED VISUAL STYLES FOR IMAGES --- */
         .planet-visual {
             width: 100px;
             height: 100px;
-            border-radius: 50%;
-            background: #ccc;
-            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), 0 0 15px rgba(255,255,255,0.1);
+            /* Removed hard background/border for PNGs to shine */
+            background: transparent; 
+            border-radius: 0;
+            box-shadow: none;
+            filter: drop-shadow(0 0 10px rgba(138, 101, 230, 0.3));
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
-            overflow: hidden;
+        }
+
+        .planet-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
         }
         
         /* Hover Effects for Planets */
         .planet-item:hover {
-            transform: translateY(-10px) scale(1.1);
+            transform: translateY(-10px) scale(1.05);
         }
         
-        .planet-item:hover .planet-visual {
-            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), 0 0 25px var(--primary-purple);
+        .planet-item:hover .planet-visual img {
+            transform: scale(1.2) rotate(5deg);
+            filter: drop-shadow(0 0 20px rgba(174, 251, 255, 0.6));
         }
 
         .planet-name {
@@ -556,26 +567,36 @@
             animation: fadeUp 1s ease 2s forwards;
         }
 
+        /* --- NEW REPLAY BUTTON STYLES (Matching .skip-button) --- */
         .replay-btn {
+            font-family: 'Space Grotesk', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            font-weight: 400;
+
+            /* Glass styling matching .skip-button */
             padding: 1rem 3rem;
-            font-size: 1.2rem;
-            background: transparent;
-            border: 2px solid var(--primary-purple);
-            color: white;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.6);
             border-radius: 50px;
             cursor: pointer;
-            font-family: 'Fredoka', sans-serif;
-            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            
+            /* Layout */
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 0 20px rgba(138, 101, 230, 0.2);
-            font-weight: 600;
+            box-shadow: 0 0 20px rgba(138, 101, 230, 0.1);
         }
 
         .replay-btn:hover {
-            background: var(--primary-purple);
-            box-shadow: 0 0 40px rgba(138, 101, 230, 0.6);
+            background: white;
+            color: var(--deep-space);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
         }
 
         @keyframes fadeUp {
@@ -603,7 +624,6 @@
 </head>
 <body class="waiting">
 
-    <!-- NEW SUBTLE PROMPT -->
     <div id="start-prompt">
         <div class="prompt-text">[ Tap anywhere to start ]</div>
         <div class="prompt-sub">
@@ -612,25 +632,21 @@
         </div>
     </div>
 
-    <!-- Starfield -->
     <div class="stars" id="starfield"></div>
     
-    <!-- Glow effects -->
     <div class="glow glow-1"></div>
     <div class="glow glow-2"></div>
 
-    <!-- Audio Element (Hidden) -->
     <audio id="bg-music" src="./PuppyCat Lullaby Space Lullaby Bee and PuppyCat (Soundtrack from the Netflix Series) Vol. 1.mp3" preload="auto"></audio>
+    
+    <audio id="hub-music" src="./Bee and Puppycat Calming Mix.mp3" loop preload="auto"></audio>
 
-    <!-- --- PART 1: THE LULLABY (SCROLLING STORY) --- -->
     <div id="story-mode">
         
-        <!-- Background Video -->
         <video id="bg-video" class="bg-video" muted loop playsinline>
             <source src="./PuppyCat Lullaby _ Space Lullaby Bee and PuppyCat (Soundtrack from the Netflix Series) Vol. 1 - Cartoon Hangover (1080p, h264).mp4" type="video/mp4">
         </video>
 
-        <!-- Global Controls -->
         <div class="ui-controls">
             <button id="mute-btn" class="control-btn" title="Toggle Mute">
                 <i data-lucide="volume-2"></i>
@@ -639,7 +655,6 @@
 
         <button id="skip-btn" class="skip-button">Skip to Hub</button>
 
-        <!-- Sections -->
         <div class="story-container">
             <div class="section" data-start="0" data-end="6">
                 <div class="content">Once upon a time...<br>there was a space outlaw</div>
@@ -731,47 +746,40 @@
         </div>
     </div>
 
-    <!-- --- PART 2: THE INTERACTIVE HUB --- -->
     <div id="interactive-hub" class="interactive-hub">
-        <!-- Three.js renders here -->
         <div id="canvas-container"></div>
 
         <div class="hub-scroll-area">
             <div class="hub-content">
                 
                 <div class="hub-header">
-                    <h1 class="hub-title">The Outlaw's Archive</h1>
-                    <p class="hub-subtitle">A collection of lost memories</p>
+                    <h1 class="hub-title">Puppycat's Lullaby</h1>
+                    <p class="hub-subtitle">Remembering a former life</p>
                 </div>
 
                 <div class="bento-grid">
-                    <!-- Hero Card: Puppycat -->
                     <div class="bento-card span-8 card-hero" style="animation-delay: 0.1s;">
                         <div class="card-content-wrap hero-content-left">
                             <i data-lucide="crown" class="card-icon"></i>
                             <h2 class="card-title">The Space Outlaw</h2>
                             <p class="card-desc">
-                                Before he was a cat-dog hybrid, he was a legendary outlaw feared across the galaxy. 
+                                Violet, get out of my beautiful face! <br> Before he was a cat-dog hybrid, he was a space outlaw! 
                                 He fell in love with the Space King's daughter, a love that would ultimately lead to his curse.
                                 Though grumpy and lazy now, traces of his powerful past remain.
                             </p>
                         </div>
-                        <!-- Placeholder Cutout Image (Puppycat Silhouette) -->
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M30,70 Q20,50 30,30 Q40,10 60,30 Q80,10 90,30 Q100,50 70,70 L30,70 Z' fill='white'/%3E%3C/svg%3E" class="pop-out-img" alt="Puppycat Silhouette">
+                        <img src="./puppycat-sick2.png" class="pop-out-img" alt="Puppycat Silhouette">
                     </div>
 
-                    <!-- Stat Card: Bee -->
                     <div class="bento-card span-4" style="animation-delay: 0.2s;">
                         <div class="card-content-wrap">
                             <i data-lucide="zap" class="card-icon"></i>
                             <h3 class="card-title">Bee</h3>
                             <p class="card-desc">A twenty-something with a chaotic life and a mysterious past involving dad-made robotics. PuppyCat's reluctant caretaker.</p>
                         </div>
-                        <!-- Placeholder Cutout Image (Bee Silhouette) -->
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='white'/%3E%3Cpath d='M20,100 Q50,70 80,100' fill='white'/%3E%3C/svg%3E" class="pop-out-img" style="width: 120px; right: 0;" alt="Bee Silhouette">
+                        <img src="./bee-cats.png" class="pop-out-img" style="width: 120px; right: 0;" alt="Bee Silhouette">
                     </div>
 
-                    <!-- Lore Card: The Curse -->
                     <div class="bento-card span-4" style="animation-delay: 0.3s;">
                         <div class="card-content-wrap">
                             <i data-lucide="sparkles" class="card-icon"></i>
@@ -782,99 +790,91 @@
                         </div>
                     </div>
 
-                    <!-- Lore Card: Violet -->
                     <div class="bento-card span-4" style="animation-delay: 0.4s;">
                         <div class="card-content-wrap">
                             <i data-lucide="heart-crack" class="card-icon"></i>
                             <h3 class="card-title">Violet & The Past</h3>
                             <p class="card-desc">
-                                Dreams hint at a woman named Violet, possibly the "Space King's Daughter" or connected to Bee's father in a past life.
+                                Mother of Cardamon, childhood friend and former co-worker of the Space Outlaw, & former landlord of Bee and The Wizard Family. 
                             </p>
                         </div>
-                         <!-- Placeholder Cutout Image (Violet Silhouette) -->
-                         <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100'%3E%3Cpath d='M25,10 Q10,30 10,50 L40,50 Q40,30 25,10' fill='white'/%3E%3C/svg%3E" class="pop-out-img" style="width: 80px; right: 10px;" alt="Violet Silhouette">
+                         <img src="./violet-asleep.png" class="pop-out-img" style="width: 80px; right: 10px;" alt="Violet Silhouette">
                     </div>
 
-                    <!-- Interactive Element: TempBot -->
                     <div class="bento-card span-4" style="animation-delay: 0.5s;">
                         <div class="card-content-wrap">
                             <i data-lucide="monitor" class="card-icon"></i>
                             <h3 class="card-title">TempBot</h3>
                             <p class="card-desc">Assigned the Outlaw his temp jobs. "Do you like... food?"</p>
                         </div>
-                        <!-- Placeholder Cutout Image (TV Silhouette) -->
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 80'%3E%3Crect x='10' y='10' width='80' height='60' rx='5' fill='white'/%3E%3Cpath d='M30,10 L20,0' stroke='white' stroke-width='5'/%3E%3Cpath d='M70,10 L80,0' stroke='white' stroke-width='5'/%3E%3C/svg%3E" class="pop-out-img" style="width: 100px; right: -10px;" alt="TV Silhouette">
+                        <img src="./tempbot.png" class="pop-out-img" style="width: 100px; right: -10px;" alt="TV Silhouette">
                     </div>
 
-                    <!-- NEW: Infinite Planet Scroller Section -->
                     <div class="bento-card span-12" style="background: transparent; border: none; padding: 2rem 0; box-shadow: none; overflow: visible;">
                         <h3 style="color: white; margin-bottom: 1.5rem; font-family: 'Space Grotesk'; font-size: 1.8rem; text-shadow: 0 0 10px rgba(138, 101, 230, 0.5);">Planetary Log</h3>
                         <div class="planet-scroller-mask">
                             <div class="planet-scroll-track">
-                                <!-- --- SET 1 --- -->
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #ff9a9e 0%, #fecfef 99%);"></div>
+                                    <div class="planet-visual"><img src="./donut-removebg-preview.png" alt="Donut"></div>
                                     <span class="planet-name">Donut Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #a18cd1 0%, #fbc2eb 100%);"></div>
-                                    <span class="planet-name">Cat Head</span>
+                                    <div class="planet-visual"><img src="./catbath-removebg-preview.png" alt="Cat Head"></div>
+                                    <span class="planet-name">Cat Head Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #89f7fe 0%, #66a6ff 100%);"></div>
-                                    <span class="planet-name">Cloud World</span>
+                                    <div class="planet-visual"><img src="./daycare-removebg-preview.png" alt="Cloud"></div>
+                                    <span class="planet-name">Daycare Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #fa709a 0%, #fee140 100%);"></div>
-                                    <span class="planet-name">Beach Planet</span>
+                                    <div class="planet-visual"><img src="./soda-removebg-preview.png" alt="Soda"></div>
+                                    <span class="planet-name">Soda (Hand) Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #4facfe 0%, #00f2fe 100%);"></div>
-                                    <span class="planet-name">Food Court</span>
+                                    <div class="planet-visual"><img src="./clown-removebg-preview.png" alt="Clown"></div>
+                                    <span class="planet-name">Clown Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #43e97b 0%, #38f9d7 100%); border-radius: 15%;"></div>
-                                    <span class="planet-name">Jelly Cube</span>
+                                    <div class="planet-visual"><img src="./jellycube-removebg-preview.png" alt="Jelly"></div>
+                                    <span class="planet-name">Jelly Cube Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #ffecd2 0%, #fcb69f 100%);"></div>
-                                    <span class="planet-name">Toast Planet</span>
+                                    <div class="planet-visual"><img src="./heart-removebg-preview.png" alt="Heart"></div>
+                                    <span class="planet-name">Heart Planet</span>
                                 </div>
-
-                                <!-- --- SET 2 (DUPLICATE FOR LOOP) --- -->
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #ff9a9e 0%, #fecfef 99%);"></div>
+                                    <div class="planet-visual"><img src="./donut-removebg-preview.png" alt="Donut"></div>
                                     <span class="planet-name">Donut Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #a18cd1 0%, #fbc2eb 100%);"></div>
-                                    <span class="planet-name">Cat Head</span>
+                                    <div class="planet-visual"><img src="./catbath-removebg-preview.png" alt="Cat Head"></div>
+                                    <span class="planet-name">Cat Head Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #89f7fe 0%, #66a6ff 100%);"></div>
-                                    <span class="planet-name">Cloud World</span>
+                                    <div class="planet-visual"><img src="./daycare-removebg-preview.png" alt="Cloud"></div>
+                                    <span class="planet-name">Daycare Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #fa709a 0%, #fee140 100%);"></div>
-                                    <span class="planet-name">Beach Planet</span>
+                                    <div class="planet-visual"><img src="./soda-removebg-preview.png" alt="Soda"></div>
+                                    <span class="planet-name">Soda (Hand) Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #4facfe 0%, #00f2fe 100%);"></div>
-                                    <span class="planet-name">Food Court</span>
+                                    <div class="planet-visual"><img src="./clown-removebg-preview.png" alt="Clown"></div>
+                                    <span class="planet-name">Clown Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #43e97b 0%, #38f9d7 100%); border-radius: 15%;"></div>
-                                    <span class="planet-name">Jelly Cube</span>
+                                    <div class="planet-visual"><img src="./jellycube-removebg-preview.png" alt="Jelly"></div>
+                                    <span class="planet-name">Jelly Cube Planet</span>
                                 </div>
                                 <div class="planet-item">
-                                    <div class="planet-visual" style="background: radial-gradient(circle at 30% 30%, #ffecd2 0%, #fcb69f 100%);"></div>
-                                    <span class="planet-name">Toast Planet</span>
+                                    <div class="planet-visual"><img src="./heart-removebg-preview.png" alt="Heart"></div>
+                                    <span class="planet-name">Heart Planet</span>
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
 
-                    <!-- Credits / Footer -->
                     <div class="bento-card span-12" style="text-align: center; animation-delay: 0.6s;">
                         <h3 class="card-title">Credits</h3>
                         <p class="card-desc">
@@ -898,6 +898,7 @@
     <script>
         // --- 1. GLOBAL VARIABLES ---
         const audio = document.getElementById('bg-music');
+        const hubAudio = document.getElementById('hub-music'); // NEW
         const bgVideo = document.getElementById('bg-video');
         const muteBtn = document.getElementById('mute-btn');
         const skipBtn = document.getElementById('skip-btn');
@@ -942,6 +943,7 @@
         // Mute Toggle
         muteBtn.addEventListener('click', () => {
             audio.muted = !audio.muted;
+            hubAudio.muted = audio.muted; // Sync mute for hub music too
             bgVideo.muted = true; // Always keep video muted
             const iconName = audio.muted ? 'volume-x' : 'volume-2';
             muteBtn.innerHTML = `<i data-lucide="${iconName}"></i>`;
@@ -994,14 +996,20 @@
 
         // Replay Function
         replayBtn.addEventListener('click', () => {
+            // Stop Hub Music
+            hubAudio.pause();
+            hubAudio.currentTime = 0;
+
             isHubActive = false;
             interactiveHub.classList.remove('active');
             storyMode.style.opacity = '1';
             storyMode.style.pointerEvents = 'auto';
             storyContainer.style.display = 'block';
+            skipBtn.style.display = 'block'; // Bring back skip button
             
             // Reset BOTH media files
             audio.currentTime = 0;
+            audio.volume = 0.5;
             bgVideo.currentTime = 0; 
             
             audio.play();
@@ -1112,6 +1120,16 @@
 
             // Fade in Hub
             interactiveHub.classList.add('active');
+            
+            // Hide Skip Button
+            skipBtn.style.display = 'none';
+
+            // --- AUDIO SWITCH LOGIC ---
+            audio.pause(); // Pause story music
+            
+            hubAudio.volume = 0.5; // Hardcoded volume
+            hubAudio.currentTime = 0;
+            hubAudio.play().catch(e => console.log("Hub audio play error:", e));
 
             // Initialize Three.js
             if (!threeInitialized) {
@@ -1122,14 +1140,15 @@
 
         // --- 6. THREE.JS IMPLEMENTATION ---
         let threeInitialized = false;
-        let scene, camera, renderer, crystal, particles;
+        let scene, camera, renderer, crystal, shapesGroup;
         let mouseX = 0, mouseY = 0;
 
         function initThreeJS() {
             const container = document.getElementById('canvas-container');
             
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x1a1a2e, 0.002);
+            // Removed thick fog for cleaner look with colored shapes
+            scene.fog = new THREE.FogExp2(0x1a1a2e, 0.001);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 30;
@@ -1164,25 +1183,37 @@
             const core = new THREE.Mesh(coreGeo, coreMat);
             crystal.add(core);
 
-            // 3D Particles
-            const particlesGeo = new THREE.BufferGeometry();
-            const particlesCount = 700;
-            const posArray = new Float32Array(particlesCount * 3);
+            // --- NEW: TINY COLORED SHAPES (Confetti) ---
+            shapesGroup = new THREE.Group();
+            const shapeGeometries = [
+                new THREE.TetrahedronGeometry(0.5),
+                new THREE.BoxGeometry(0.5, 0.5, 0.5),
+                new THREE.OctahedronGeometry(0.5)
+            ];
+            
+            const colors = [0xFF9A9E, 0xFECFEF, 0xA18CD1, 0xFBC2EB, 0x89F7FE, 0x66A6FF, 0xFA709A, 0xFEE140];
 
-            for(let i = 0; i < particlesCount * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 200; 
+            for (let i = 0; i < 200; i++) {
+                const geo = shapeGeometries[Math.floor(Math.random() * shapeGeometries.length)];
+                const mat = new THREE.MeshStandardMaterial({
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    roughness: 0.4,
+                    metalness: 0.1
+                });
+                
+                const mesh = new THREE.Mesh(geo, mat);
+                
+                // Random Position
+                mesh.position.x = (Math.random() - 0.5) * 100;
+                mesh.position.y = (Math.random() - 0.5) * 100;
+                mesh.position.z = (Math.random() - 0.5) * 80;
+
+                // Random Rotation
+                mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+                
+                shapesGroup.add(mesh);
             }
-
-            particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const particlesMat = new THREE.PointsMaterial({
-                size: 0.2,
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.8,
-            });
-
-            particles = new THREE.Points(particlesGeo, particlesMat);
-            scene.add(particles);
+            scene.add(shapesGroup);
 
             // Lights
             const ambientLight = new THREE.AmbientLight(0x404040);
@@ -1215,15 +1246,26 @@
 
         function animate() {
             requestAnimationFrame(animate);
+            
             if (crystal) {
                 crystal.rotation.x += 0.002;
                 crystal.rotation.y += 0.003;
                 crystal.rotation.x += (mouseY * 0.001 - crystal.rotation.x) * 0.1;
                 crystal.rotation.y += (mouseX * 0.001 - crystal.rotation.y) * 0.1;
             }
-            if (particles) {
-                particles.rotation.y -= 0.0005;
+
+            // Animate the group of colored shapes
+            if (shapesGroup) {
+                shapesGroup.rotation.y -= 0.001;
+                shapesGroup.rotation.x += 0.0005;
+                
+                // Optional: Gently rotate individual shapes
+                shapesGroup.children.forEach(child => {
+                    child.rotation.x += 0.01;
+                    child.rotation.y += 0.01;
+                });
             }
+
             renderer.render(scene, camera);
         }
 
