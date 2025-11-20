@@ -370,7 +370,7 @@
             font-weight: 400;
             
             /* Fix for cutoff text: */
-            line-height: 1.4;      /* Gives space for tall ascenders/descenders */
+            line-height: 1.4;       /* Gives space for tall ascenders/descenders */
             padding-bottom: 0.2em; /* Extra room for the bottom glow/shadow */
             padding-right: 0.1em;  /* Extra room for the right-side slant */
             display: inline-block; /* Ensures padding works correctly with the gradient */
@@ -478,11 +478,17 @@
         }
 
         /* --- PLANET SCROLLER SECTION (INFINITE SCROLL) --- */
+        /* FIX APPLIED HERE */
         .planet-scroller-mask {
             position: relative;
             width: 100%;
             overflow: hidden;
-            padding: 1rem 0 2rem 0;
+            
+            /* INCREASED PADDING: Allows scale(1.2) and shadows to fit */
+            padding: 3rem 0; 
+            /* Negative margin to pull layout back in if padding makes it too tall */
+            margin: -1rem 0;
+            
             /* Fade edges for smooth look */
             mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
             -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
@@ -514,6 +520,9 @@
             gap: 10px;
             cursor: pointer;
             transition: transform 0.3s ease;
+            /* Ensure margins don't collapse and cut off content */
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         /* --- UPDATED VISUAL STYLES FOR IMAGES --- */
@@ -530,6 +539,8 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            /* Ensure visual doesn't clip inner content */
+            overflow: visible;
         }
 
         .planet-visual img {
@@ -1278,4 +1289,3 @@
     </script>
 </body>
 </html>
-
